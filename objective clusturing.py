@@ -16,25 +16,25 @@ CLUSTER_COLORS = ["#2196F3", "#4CAF50", "#FFEB3B", "#FF9800", "#F44336"]
 
 objectives = {
     "Rainfall":     ['precipitation', 'rain', 'snowfall',
-                     'relative_humidity_2m', 'cloud_cover',
-                     'pressure_msl', 'dew_point_2m'],
+                    'relative_humidity_2m', 'cloud_cover',
+                    'pressure_msl', 'dew_point_2m'],
     "Cloud":        ['cloud_cover', 'cloud_cover_low', 'cloud_cover_mid',
-                     'cloud_cover_high', 'relative_humidity_2m',
-                     'temperature_2m', 'dew_point_2m', 'aerosol_optical_depth'],
+                    'cloud_cover_high', 'relative_humidity_2m',
+                    'temperature_2m', 'dew_point_2m', 'aerosol_optical_depth'],
     "Solar":        ['shortwave_radiation', 'direct_radiation',
-                     'diffuse_radiation', 'uv_index',
-                     'uv_index_clear_sky', 'cloud_cover'],
+                    'diffuse_radiation', 'uv_index',
+                    'uv_index_clear_sky', 'cloud_cover'],
     "HeatWave":     ['temperature_2m', 'apparent_temperature',
-                     'relative_humidity_2m', 'dew_point_2m',
-                     'uv_index', 'shortwave_radiation', 'wind_speed_10m'],
+                    'relative_humidity_2m', 'dew_point_2m',
+                    'uv_index', 'shortwave_radiation', 'wind_speed_10m'],
     "IndPollution": ['pm10', 'pm2_5', 'carbon_monoxide',
-                     'nitrogen_dioxide', 'sulphur_dioxide',
-                     'ozone', 'aerosol_optical_depth', 'dust'],
+                    'nitrogen_dioxide', 'sulphur_dioxide',
+                    'ozone', 'aerosol_optical_depth', 'dust'],
     "AQI":          ['pm10', 'pm2_5', 'carbon_monoxide',
-                     'nitrogen_dioxide', 'sulphur_dioxide', 'ozone'],
+                    'nitrogen_dioxide', 'sulphur_dioxide', 'ozone'],
     "AirPollution": ['pm10', 'pm2_5', 'nitrogen_dioxide',
-                     'sulphur_dioxide', 'ozone', 'dust',
-                     'wind_speed_10m', 'wind_direction_10m'],
+                    'sulphur_dioxide', 'ozone', 'dust',
+                    'wind_speed_10m', 'wind_direction_10m'],
 }
 
 # =========================================================
@@ -88,7 +88,7 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
             plot_df["time"] = time_col.loc[valid_idx].values
 
         # ── Chart 1: Elbow ───────────────────────────────
-        inertias = []
+        '''inertias = []
         for k in range(1, 10):
             m = KMeans(n_clusters=k, random_state=42, n_init=10)
             m.fit(Xs)
@@ -100,7 +100,7 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
             .mark_line(point=True, color="#1976D2")
             .encode(
                 x=alt.X("k:Q", title="Number of Clusters (k)",
-                         axis=alt.Axis(tickMinStep=1)),
+                        axis=alt.Axis(tickMinStep=1)),
                 y=alt.Y("inertia:Q", title="Inertia"),
                 tooltip=["k:Q", alt.Tooltip("inertia:Q", format=".1f")]
             )
@@ -113,7 +113,7 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         elbow_chart = (elbow_line + elbow_rule).properties(
             title=f"{obj_name} — Elbow Method",
             width=280, height=200
-        )
+        )'''
 
         # ── Chart 2: Scatter (first 2 features) ─────────
         scatter_df = pd.DataFrame({
@@ -171,7 +171,7 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         )
 
         # ── Chart 4: Heatmap — feature means per cluster ─
-        means = plot_df.groupby("cluster")[available].mean()
+        ''' means = plot_df.groupby("cluster")[available].mean()
         norm  = (means - means.min()) / (means.max() - means.min() + 1e-9)
         heat_df = norm.reset_index().melt(
             id_vars="cluster", var_name="feature", value_name="value"
@@ -183,7 +183,7 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
             .mark_rect()
             .encode(
                 x=alt.X("feature:N", title="Feature",
-                         axis=alt.Axis(labelAngle=-35)),
+                        axis=alt.Axis(labelAngle=-35)),
                 y=alt.Y("cluster:O", title="Cluster"),
                 color=alt.Color(
                     "value:Q",
@@ -191,12 +191,13 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
                     title="Norm. Mean"
                 ),
                 tooltip=["cluster:O", "feature:N",
-                         alt.Tooltip("value:Q", format=".3f")]
+                        alt.Tooltip("value:Q", format=".3f")]
             )
         ).properties(
             title=f"{obj_name} — Feature Means per Cluster (normalised)",
             width=400, height=180
         )
+        '''
 
         # ── Chart 5: Clusters over time ──────────────────
         if time_col is not None:
@@ -223,13 +224,13 @@ def process_sheet(df_raw: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
 
         # ── Assemble objective block ──────────────────────
         row1 = (
-            alt.hconcat(elbow_chart, scatter, bar)
+            alt.hconcat( scatter, bar)
             .resolve_scale(color="independent")
         )
         row2 = (
-            alt.hconcat(heatmap, time_chart)
+            alt.hconcat( time_chart)
             .resolve_scale(color="independent")
-        ) if time_chart else heatmap
+        ) if time_chart else None
 
         combined = (
             alt.vconcat(row1, row2)
